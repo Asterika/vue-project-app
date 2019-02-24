@@ -1,0 +1,344 @@
+LESSON 1 - VUE INSTANCES
+index.html:
+<!-- STEP 1 - LOAD BP AND SCRIPTS -->
+
+main.js:
+// STEP 2 - CREATE VARIABLE
+
+index.html:
+<!-- STEP 3 - ADD CDN TO INSTALL VUE-->
+
+main.js:
+// STEP 4 - CHANGE VAR = APP, MAKE A NEW VUE INSTANCE
+// # connects app to app in index.html w/ id of app
+
+index.html:
+<!-- STEP 5 - REFERENCE PRODUCT PROP IN MAIN.JS DATA OBJECT -->
+
+new Vue = instance/heart of App
+el indicates we want to plug in the properties of that options object into our html
+{{ expression }}
+i.e.
+{{ clicked ? true : false }}
+Vue is reactive - if we change Socks to Boots, it will update in every place that data is referenced
+
+LESSON 2: ATTRIBUTE BINDING
+
+bind creates a bond btwn the data the attribute we want it to be bound to
+
+v-bind dynamically binds an attribute to an expression
+v:bind:src="expression"
+src - attribute
+expression - in quotes
+
+LESSON 3 - CONDITIONAL RENDERING
+conditionally render/display for an item that's in/out of stock
+index.html - add in stock and out of stock <p> tags
+main.js - add inStock: true (or false) to data object
+index.html - conditionally render as such:
+<p v-if="inStock">In Stock</p>
+<p v-else>Out of Stock</p>
+
+Now, make it more complex, conditionally render depending on inventory amount
+main.js - add inventory property to data object
+inventory: 100
+
+index.html:
+  <p v-if="inventory > 10">In Stock</p>
+  <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
+  <p v-else>Out of Stock</p>
+If we change main.js inventory: 8 //almost sold out!
+
+can simply use <p v-show> -- toggles the visibility on/off, better thnan removing object from DOM entirely
+
+LESSON 4 - LIST RENDERING
+main.js - add a list of details as an array to data object
+index.html - add a ul with lis, to li, add a v-for="detail in details"
+v-for creates a for loop that will iterate over each item/detail in the items/details array
+add the expression {{ detail }} to display each item as a list item
+<li v-for="details in detail">{{ detail }}</li>
+** details - name of collection that contains our data
+** detail - alias for the element we're iterating on
+
+For more complex situations, i.e. we add a variants array with variantId and variantColor,
+create a div with v-for="variant in variants"
+then reference a property with dot notation:
+i.e. {{ variant.variantColor }}
+
+***For lists like this, use a special key so Vue can keep track of each node's identity
+here we use the shorthand for v-bind
+:key="variant.variantId"
+
+LESSON 5 - EVENT HANDLING
+index.html - added button for Add to Cart AND div with Cart({{cart}})
+main.js - added cart:0 to our data object
+index.html - add a v-on to the Cart button - will listen for event you specify
+<button v-on:click="cart += 1">
+as application grows,
+we want to be able to trigger methods from w/in these expressions
+index.html - replace cart +=1 with method addToCart
+
+main.js -
+//add a methods property to our data object
+methods: {
+  //create an anonymous function
+  addToCart: function () {
+    //have the cart above increment by 1
+    this.cart += 1
+  }
+}
+
+creating a hover event (in this case, so hovering over green will display green socks and vv for blue)
+add v-on
+v-on is so common it has a shorthand of @
+so, @mouseover="updateProduct"
+when our mouse is over it, trigger updateProduct
+add an argument:
+updateProduct(variant.variantImage)
+
+we can also write our functions w/ ES6 syntax but not all browsers support
+addToCart: function () {
+
+}
+BECOMES
+addToCart() {
+
+}
+
+can use v-on with several other events:
+button @clicke
+div @mouseover
+form @submit="addToCart"
+input @keyup.enter="send"
+
+.enter - modifier that when enter key is pressed and released, send method is triggered
+
+LESSON 6 - CLASS & STYLE BINDING
+instead of just words blue and green, let's add colors to hover over
+to do so, use style binding:
+
+add v-bind to new styling to swap colors:
+:style="{ backgroundColor: variant.variantColor }" >
+
+more examples:
+index.html
+color on left = css prop adding
+color on right = color from our data to set it to red
+<h1 :style="{ color: color }"></h1>
+
+main.js
+data: {
+  color: red
+}
+
+OFTEN CLEANER TO BIND TO A STYLE OBJ IF THERE ARE MULTIPLE properties
+i.e.
+<span :style='styleObject'></span>
+
+data: {
+  styleObject: {
+    color: 'red',
+    fontSize: '13px'
+  }
+}
+
+If multiple styleObjects, could bind to them from an array
+<p :style="[styleObject1, styleObject2]"></p>
+
+Our button increments when we add to cart,
+but what about when inStock is false?
+We shouldn't be able to add stuff to Cart
+
+Simple solution - bind disabled to our inStock data
+disables our button when inStock is not true
+
+//when button is clicked on, trigger addToCart
+<button v-on:click="addToCart"
+  //disable the button when inStock is not true
+  //BUT, button will still look clickable
+  :disabled="!inStock"
+  //add a CSS class and bind it to the button to make it appear unclickable
+  :class="{ disabledButton: !inStock }">Add to Cart</button>
+
+  MORE EXAMPLES OF CLASS BINDING:
+  div already has a class, so we can add one dynamically via binding
+  <div class="color-box"
+       :class="{ active: activeClass, 'text-danger: errorClass' }"></div>
+  data : {
+    activeClass: true,
+    errorClass: false
+  }
+
+  can add an array of classes for multiple objs
+  or even a ternary operator
+
+  <div
+    :class="[isActive ? activeClass : '']">
+    isActive true?
+    if yes, run activeClass
+    else, empty string
+
+  </div>
+
+  LESSON 7 - COMPUTED PROPERTIES
+  index.html
+  instead of referencing properties next to each other like so:
+  {{ brand }}{{ product }}
+  we can add them together in a computed property
+  {{ title }}
+
+  main.js
+  computed: {
+    title() {
+      return this.title + ' ' + this.product
+    }
+  }
+
+  computed properties' result is cached = result is saved until its dependenceis change
+  since brand and product are both dependencies of title,
+  if brand changes,
+  title is rerun
+  and that new value is cached
+
+  more efficient to use computed properties vs methods
+  for an expensive operation you don't want to rerun
+  every time you access it
+
+can make image into a computed property since we will be accessing it a lot
+image () {
+  //this will target either the first or second element in that array
+  //use dot notation to target its image
+  return this.variants[this.selectedVariant].variantImage
+}
+
+LESSON 8 - COMPONENTS, REUSABLE BLOCKS OF CODE FOR MODULAR, MAINTABLE code
+can have components w/in components
+i.e. a box on a site may have button components nested w/in it
+
+1. Register component + specify name of component
+2. second argument is options object
+Vue.component('product', {
+  3. instead of plugging into the DOM,
+     a component has a template property to specify structure of the component - can construct in many ways, but for now, we'll use template literal with backticks
+     template: `<h1>I'm a component</h1>`
+     //if we try to contain this sibling within the same template (backticks would go on end of h2), we will get error message
+     i.e. <h2>Aren't I beautiful?</h2>
+
+     SOLVE: WRAP ELEMENT IN A div
+     template: `
+      <div>
+
+      </div>
+      `,
+      //can add data, but it becomes a function that returns a data object with fresh data for each component
+      data() {
+        return {
+
+        }
+      }
+
+} )
+
+
+what if our component is nested within a parent component that contains message data?
+since it has its own isolated scope,
+it cannot reach outside of itself
+to access message data
+
+we can use props
+a custom attribute for passing data into our components
+
+to receive props,
+a component needs to explicitly declare
+the props it expects to receive
+using the props option:
+
+//here the product component can access prop called message
+//we can thus use message in our component's template
+Vue.component('product', {
+  props: [message],
+  template: `<div>{{ message }}</div>`,
+  data() {...}
+})
+
+to pass it into html:
+<product message="hello!"></product>
+
+WHEN DECLARING PROPS, IT IS BEST TO SPECIFY REQUIREMENTS WITH VUE'S BUILT-IN PROP VALIDATION:
+//to do this,
+//switch out props array
+//for props object
+Vue.component('product', {
+  props: {
+    message: {
+      type: String,
+      required: true,
+      default: 'Hi'
+    }
+  },
+  template...
+})
+
+
+LESSON 9 - COMMUNICATING EVENTS
+
+currently, cart is in template of our project component
+BUT doesn't make sense for each product to have its own Cart
+SO, we can move the cart into a more global position so each product adds to same cart
+
+main.js - copy and remove cart
+index.js - paste cart right under div with id of app
+
+main.js - move cart data from cart component to Vue instance
+this will make cart data globally accessible to the app rather than just that component
+
+but how do we now increment cart? that data is trapped w/in the component...
+if there is a button click,
+we need a way to let our parent know
+that event happened
+we can't say "this.cart"
+b/c the cart is not in this component
+
+how do we increment cart from w/in our product component?
+let the parent know by emitting an event
+then pass in a name for that event
+main.js:
+addToCart() {
+  this.$emit('add-to-cart')
+}
+
+So, button now EMITS event
+but nowhere yet receives it...
+add the ability to listen to our product component
+index.html
+<product :premium="premium" @add-to-cart="updateCart">
+
+  So when button is clicked,
+  it emits and event
+  that is received by the event handler @add-to-cart on the product component
+  this triggers the updateCart method
+  on the Vue instance, which increments the cart
+
+
+Instead of a number though, we want to know what was just added to the Cartm
+main.js:
+cart: []
+
+updateCart(id) {
+  this.cart.push(id)
+}
+
+then need to pass it up for the emit add to cart event
+add it as a second parameter
+use the same syntax we used to target the variantImage:
+this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId)
+
+in order for the cart to display the number of items, now each associated with a product id:
+index.html
+{{ cart.length }}
+only display the length of the cart array
+
+LESSON 10 - FORMS
+need to have users add reviews/forms
+
+make a new component for product reviews
